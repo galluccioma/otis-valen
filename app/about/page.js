@@ -167,7 +167,7 @@ export default function About() {
               I design things that click — literally and emotionally. From
               <span> bold</span> brands to <span>pixel-perfect</span> websites, my work lives in the
               digital space where color, energy, and <span>clever</span> details
-              come out to play. I'm not here to decorate; I'm here to
+              come out to play. I'm not here to decorate; I\'m here to
               <span> connect</span>.
             </h3>
             <h3>
