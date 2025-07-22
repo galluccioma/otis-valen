@@ -1,0 +1,723 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import Image from 'next/image'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import Layout from '../components/Layout'
+import ContactCTA from '../components/ContactCTA'
+import Footer from '../components/Footer'
+
+export default function Home() {
+  const [currentImageIndex, setCurrentImageIndex] = useState(1)
+  const totalImages = 10
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger)
+
+    // Hero image rotation
+    const interval = setInterval(() => {
+      setCurrentImageIndex(prev => prev >= totalImages ? 1 : prev + 1)
+    }, 250)
+
+    // Hero image scroll animation
+    const heroScrollTrigger = ScrollTrigger.create({
+      trigger: '.hero-img-holder',
+      start: 'top bottom',
+      end: 'top top',
+      onUpdate: (self) => {
+        const progress = self.progress
+        gsap.set('.hero-img', {
+          y: `${-110 + 110 * progress}%`,
+          scale: 0.25 + 0.75 * progress,
+          rotation: -15 + 15 * progress,
+        })
+      },
+    })
+
+    // Featured work animations
+    const initFeaturedWork = () => {
+      if (window.innerWidth <= 1000) return
+
+      const indicatorContainer = document.querySelector('.featured-work-indicator')
+      if (!indicatorContainer) return
+
+      indicatorContainer.innerHTML = ''
+
+      for (let section = 1; section <= 5; section++) {
+        const sectionNumber = document.createElement('p')
+        sectionNumber.className = 'mn'
+        sectionNumber.textContent = `0${section}`
+        indicatorContainer.appendChild(sectionNumber)
+
+        for (let i = 0; i < 10; i++) {
+          const indicator = document.createElement('div')
+          indicator.className = 'indicator'
+          indicatorContainer.appendChild(indicator)
+        }
+      }
+
+      const featuredCardPosSmall = [
+        { y: 100, x: 1000 },
+        { y: 1500, x: 100 },
+        { y: 1250, x: 1950 },
+        { y: 1500, x: 850 },
+        { y: 200, x: 2100 },
+        { y: 250, x: 600 },
+        { y: 1100, x: 1650 },
+        { y: 1000, x: 800 },
+        { y: 900, x: 2200 },
+        { y: 150, x: 1600 },
+      ]
+
+      const featuredCardPosLarge = [
+        { y: 800, x: 5000 },
+        { y: 2000, x: 3000 },
+        { y: 240, x: 4450 },
+        { y: 1200, x: 3450 },
+        { y: 500, x: 2200 },
+        { y: 750, x: 1100 },
+        { y: 1850, x: 3350 },
+        { y: 2200, x: 1300 },
+        { y: 3000, x: 1950 },
+        { y: 500, x: 4500 },
+      ]
+
+      const featuredCardPos = window.innerWidth >= 1600 ? featuredCardPosLarge : featuredCardPosSmall
+      const featuredTitles = document.querySelector('.featured-titles')
+      const moveDistance = window.innerWidth * 4
+      const imagesContainer = document.querySelector('.featured-images')
+
+      if (!imagesContainer) return
+
+      imagesContainer.innerHTML = ''
+
+      for (let i = 1; i <= 10; i++) {
+        const featuredImgCard = document.createElement('div')
+        featuredImgCard.className = `featured-img-card featured-img-card-${i}`
+
+        const img = document.createElement('img')
+        img.src = `/images/work-items/work-item-${i}.jpg`
+        img.alt = `featured work image ${i}`
+        featuredImgCard.appendChild(img)
+
+        const position = featuredCardPos[i - 1]
+
+        gsap.set(featuredImgCard, {
+          x: position.x,
+          y: position.y,
+          z: -1500,
+          scale: 0,
+        })
+
+        imagesContainer.appendChild(featuredImgCard)
+      }
+
+      const featuredImgCards = document.querySelectorAll('.featured-img-card')
+
+      ScrollTrigger.create({
+        trigger: '.featured-work',
+        start: 'top top',
+        end: `+=${window.innerHeight * 5}px`,
+        pin: true,
+        scrub: 1,
+        onUpdate: (self) => {
+          const xPosition = -moveDistance * self.progress
+          gsap.set(featuredTitles, {
+            x: xPosition,
+          })
+
+          featuredImgCards.forEach((featuredImgCard, index) => {
+            const staggerOffset = index * 0.075
+            const scaledProgress = (self.progress - staggerOffset) * 2
+            const individualProgress = Math.max(0, Math.min(1, scaledProgress))
+            const newZ = -1500 + (1500 + 1500) * individualProgress
+            const scaleProgress = Math.min(1, individualProgress * 10)
+            const scale = Math.max(0, Math.min(1, scaleProgress))
+
+            gsap.set(featuredImgCard, {
+              z: newZ,
+              scale: scale,
+            })
+          })
+
+          const indicators = document.querySelectorAll('.indicator')
+          const totalIndicators = indicators.length
+          const progressPerIndicator = 1 / totalIndicators
+
+          indicators.forEach((indicator, index) => {
+            const indicatorStart = index * progressPerIndicator
+            const indicatorOpacity = self.progress > indicatorStart ? 1 : 0.2
+
+            gsap.to(indicator, {
+              opacity: indicatorOpacity,
+              duration: 0.3,
+            })
+          })
+        },
+      })
+    }
+
+    // Services animations
+    const initServices = () => {
+      if (window.innerWidth <= 1000) return
+
+      const services = gsap.utils.toArray('.service-card')
+
+      services.forEach((service, index) => {
+        const isLastServiceCard = index === services.length - 1
+        const serviceCardInner = service.querySelector('.service-card-inner')
+
+        if (!isLastServiceCard) {
+          ScrollTrigger.create({
+            trigger: service,
+            start: 'top 45%',
+            endTrigger: '.contact-cta',
+            end: 'top 90%',
+            pin: true,
+            pinSpacing: false,
+          })
+
+          gsap.to(serviceCardInner, {
+            y: `-${(services.length - index) * 14}vh`,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: service,
+              start: 'top 45%',
+              endTrigger: '.contact-cta',
+              end: 'top 90%',
+              scrub: true,
+            },
+          })
+        }
+      })
+    }
+
+    initFeaturedWork()
+    initServices()
+
+    const handleResize = () => {
+      ScrollTrigger.refresh()
+      initFeaturedWork()
+      initServices()
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      clearInterval(interval)
+      heroScrollTrigger.kill()
+      window.removeEventListener('resize', handleResize)
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill())
+    }
+  }, [])
+
+  return (
+    <Layout currentPage="home">
+      <div className="page home-page">
+        {/* Hero */}
+        <section className="hero">
+          <div className="hero-header-wrapper">
+            <div className="hero-header hero-header-1">
+              <h1>umazing</h1>
+            </div>
+            <div className="hero-header hero-header-2">
+              <h1>studio</h1>
+            </div>
+          </div>
+          <div className="hero-footer">
+            <div className="hero-footer-symbols">
+              <Image src="/images/global/symbols.png" alt="" width={100} height={16} />
+            </div>
+            <div className="hero-footer-scroll-down">
+              <p className="mn">Pixels by Otis / 2025</p>
+            </div>
+            <div className="hero-footer-tags">
+              <p className="mn">Portfolio Mode: ON</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Hero Image Holder */}
+        <section className="hero-img-holder">
+          <div className="hero-img">
+            <Image 
+              src={`/images/work-items/work-item-${currentImageIndex}.jpg`} 
+              alt="Hero image" 
+              width={800}
+              height={600}
+            />
+          </div>
+        </section>
+
+        {/* Featured Work */}
+        <section className="featured-work">
+          <div className="featured-images"></div>
+          <div className="featured-titles">
+            <div className="featured-title-wrapper">
+              <h1 className="featured-title">Work Playground</h1>
+            </div>
+            <div className="featured-title-wrapper">
+              <div className="featured-title-img">
+                <Image src="/images/work-items/work-item-1.jpg" alt="" width={400} height={150} />
+              </div>
+              <h1 className="featured-title">Cosmic Deli</h1>
+            </div>
+            <div className="featured-title-wrapper">
+              <div className="featured-title-img">
+                <Image src="/images/work-items/work-item-2.jpg" alt="" width={400} height={150} />
+              </div>
+              <h1 className="featured-title">Skull Pop 7</h1>
+            </div>
+            <div className="featured-title-wrapper">
+              <div className="featured-title-img">
+                <Image src="/images/work-items/work-item-3.jpg" alt="" width={400} height={150} />
+              </div>
+              <h1 className="featured-title">Red Dot Mission</h1>
+            </div>
+            <div className="featured-title-wrapper">
+              <div className="featured-title-img">
+                <Image src="/images/work-items/work-item-4.jpg" alt="" width={400} height={150} />
+              </div>
+              <h1 className="featured-title">Sweetbones</h1>
+            </div>
+          </div>
+          <div className="featured-work-indicator"></div>
+          <div className="featured-work-footer">
+            <p className="mn">Visual Vault [ 10 ]</p>
+            <p className="mn">///////////////////</p>
+            <p className="mn"><a href="/work">Browse Full Bizarre</a></p>
+          </div>
+        </section>
+
+        {/* Services Header */}
+        <section className="services-header">
+          <div className="services-header-content">
+            <div className="services-profile-icon">
+              <Image
+                src="/images/services-header/portrait.jpeg"
+                alt="Otis Valen Portrait"
+                width={100}
+                height={100}
+              />
+            </div>
+            <p>Your ideas. My toolbox.</p>
+            <div className="services-header-title">
+              <h1>Pixel wizardry</h1>
+              <h1>served fresh</h1>
+            </div>
+            <div className="services-header-arrow-icon">
+              <h1>&#8595;</h1>
+            </div>
+          </div>
+        </section>
+
+        {/* Services */}
+        <section className="services">
+          <div className="service-card" id="service-card-1">
+            <div className="service-card-inner">
+              <div className="service-card-content">
+                <h1>Visual DNA</h1>
+              </div>
+              <div className="service-card-img">
+                <Image
+                  src="/images/services/service-1.jpg"
+                  alt="Experience Design"
+                  width={400}
+                  height={500}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="service-card" id="service-card-2">
+            <div className="service-card-inner">
+              <div className="service-card-content">
+                <h1>Brand Alchemy</h1>
+              </div>
+              <div className="service-card-img">
+                <Image
+                  src="/images/services/service-2.jpg"
+                  alt="Experience Design"
+                  width={400}
+                  height={500}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="service-card" id="service-card-3">
+            <div className="service-card-inner">
+              <div className="service-card-content">
+                <h1>Feel First Design</h1>
+              </div>
+              <div className="service-card-img">
+                <Image
+                  src="/images/services/service-3.jpg"
+                  alt="Experience Design"
+                  width={400}
+                  height={500}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="service-card" id="service-card-4">
+            <div className="service-card-inner">
+              <div className="service-card-content">
+                <h1>Human Clicks</h1>
+              </div>
+              <div className="service-card-img">
+                <Image
+                  src="/images/services/service-4.jpg"
+                  alt="Experience Design"
+                  width={400}
+                  height={500}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <ContactCTA />
+        <Footer />
+      </div>
+
+      <style jsx>{`
+        /* Home page specific styles */
+        .hero {
+          position: relative;
+          width: 100vw;
+          height: 100svh;
+          padding: 2em;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          overflow-x: hidden;
+        }
+
+        .hero .hero-header h1 {
+          font-size: 20vw;
+          line-height: 0.9;
+        }
+
+        .hero .hero-header.hero-header-1 {
+          position: relative;
+          transform: translateX(-20%);
+          z-index: -1;
+        }
+
+        .hero .hero-header.hero-header-2 {
+          position: relative;
+          transform: translateX(20%);
+          z-index: 2;
+        }
+
+        .hero .hero-footer {
+          position: absolute;
+          width: 100%;
+          bottom: 0;
+          padding: 2em;
+          display: flex;
+          justify-content: space-between;
+        }
+
+        .hero .hero-footer .hero-footer-scroll-down {
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+
+        .hero .hero-footer .hero-footer-symbols {
+          height: 1rem;
+        }
+
+        .hero-img-holder {
+          position: relative;
+          width: 100vw;
+          height: 100svh;
+          padding: 2em;
+        }
+
+        .hero-img-holder .hero-img {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          transform: translateY(-110%) scale(0.25) rotate(-15deg);
+          border: 0.3em solid var(--fg);
+          border-radius: 2em;
+          overflow: hidden;
+        }
+
+        .featured-work {
+          position: relative;
+          width: 100vw;
+          height: 100svh;
+          overflow: hidden;
+        }
+
+        .featured-work .featured-titles {
+          position: relative;
+          width: 500vw;
+          height: 100vh;
+          display: flex;
+          will-change: transform;
+        }
+
+        .featured-work .featured-title-wrapper {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .featured-title-img {
+          position: relative;
+          top: 0px;
+          width: calc(100% - 4em);
+          height: 150px;
+          border: 0.2em solid var(--fg);
+          border-radius: 1em;
+          overflow: hidden;
+          display: none;
+        }
+
+        .featured-work .featured-title-wrapper h1 {
+          text-align: center;
+          transform: translateY(-0.5em);
+        }
+
+        .featured-work .featured-images {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 200vw;
+          height: 200vh;
+          transform-style: preserve-3d;
+          perspective: 500px;
+        }
+
+        .featured-work .featured-img-card {
+          position: absolute;
+          width: 300px;
+          height: 300px;
+          border-radius: 2em;
+          overflow: hidden;
+        }
+
+        .featured-work .featured-work-indicator {
+          position: absolute;
+          top: 50%;
+          right: 2em;
+          transform: translate(0%, -50%);
+          width: 2rem;
+          height: max-content;
+          padding: 1.25rem 0.65rem;
+          background-color: var(--fg);
+          color: var(--bg);
+          border-radius: 40px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          gap: 0.35rem;
+          z-index: 10;
+        }
+
+        .featured-work .featured-work-indicator .indicator {
+          width: 100%;
+          height: 1.5px;
+          background-color: var(--bg);
+          opacity: 0.2;
+        }
+
+        .featured-work .featured-work-footer {
+          position: absolute;
+          bottom: 0;
+          width: 100%;
+          padding: 2em;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          z-index: 2;
+        }
+
+        .services-header {
+          position: relative;
+          width: 100vw;
+          height: 100vh;
+          padding: 2em;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+        }
+
+        .services-header .services-profile-icon {
+          position: relative;
+          width: 100px;
+          height: 100px;
+          border-radius: 1em;
+          margin-bottom: 2em;
+          outline: 0.25rem solid var(--accent3);
+          border: 0.25rem solid var(--fg);
+          overflow: hidden;
+        }
+
+        .services-header .services-header-content {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          gap: 1em;
+        }
+
+        .services-header .services-header-title {
+          margin-bottom: 6em;
+        }
+
+        .services .service-card {
+          position: relative;
+          min-height: 300px;
+        }
+
+        .services .service-card-inner {
+          position: relative;
+          will-change: transform;
+          width: calc(100vw - 4em);
+          height: 100%;
+          margin: 0 auto;
+          padding: 2em;
+          display: flex;
+          gap: 4em;
+          border-radius: 2em;
+          min-height: 500px;
+        }
+
+        .services .service-card-content {
+          flex: 3;
+          display: flex;
+          flex-direction: column;
+          gap: 2em;
+        }
+
+        .services .service-card-img {
+          flex: 1;
+          aspect-ratio: 4/5;
+          border-radius: 2em;
+          overflow: hidden;
+        }
+
+        .services #service-card-1 .service-card-inner {
+          background-color: var(--accent1);
+        }
+
+        .services #service-card-2 .service-card-inner {
+          background-color: var(--accent2);
+        }
+
+        .services #service-card-3 .service-card-inner {
+          background-color: var(--accent3);
+        }
+
+        .services #service-card-4 .service-card-inner {
+          background-color: var(--fg);
+          color: var(--bg);
+        }
+
+        @media (max-width: 1000px) {
+          .hero .hero-footer .hero-footer-symbols {
+            display: none;
+          }
+
+          .hero .hero-footer {
+            display: flex;
+            justify-content: flex-end;
+          }
+
+          .hero .hero-footer .hero-footer-scroll-down {
+            left: 2em;
+            transform: translateX(0%);
+          }
+
+          .featured-work {
+            padding: 4em 0;
+          }
+
+          .featured-work,
+          .featured-work .featured-titles {
+            height: max-content;
+          }
+
+          .featured-work .featured-title-wrapper {
+            gap: 1em;
+          }
+
+          .featured-work .featured-title-wrapper:nth-child(1) {
+            margin-bottom: 2em;
+          }
+
+          .featured-work .featured-title-wrapper h1 {
+            transform: translateY(0);
+            width: 75%;
+          }
+
+          .featured-work .featured-work-footer {
+            position: relative;
+            margin-top: 4em;
+            justify-content: center;
+          }
+
+          .featured-work .featured-work-footer p:nth-child(1),
+          .featured-work .featured-work-footer p:nth-child(2) {
+            display: none;
+          }
+
+          .featured-work .featured-work-indicator {
+            display: none;
+          }
+
+          .featured-work .featured-images {
+            display: none;
+          }
+
+          .featured-title-img {
+            display: block;
+          }
+
+          .featured-work .featured-titles {
+            width: 100vw;
+            flex-direction: column;
+            gap: 2em;
+          }
+
+          .services-header {
+            height: max-content;
+          }
+
+          .services {
+            display: flex;
+            flex-direction: column;
+            gap: 2em;
+          }
+
+          .services .service-card-inner {
+            min-height: 0;
+            flex-direction: column;
+            justify-content: center;
+            gap: 1em;
+            text-align: center;
+            border: 0.2em solid var(--fg);
+            border-radius: 1em;
+          }
+
+          .services .service-card-img {
+            aspect-ratio: 5/3;
+            border: 0.2em solid var(--fg);
+            border-radius: 1em;
+          }
+        }
+      `}</style>
+    </Layout>
+  )
+}
