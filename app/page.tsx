@@ -17,7 +17,6 @@
  export default function Home() {
 -  const [currentImageIndex, setCurrentImageIndex] = useState(1)
 -  const totalImages = 10
--
    useEffect(() => {
      gsap.registerPlugin(ScrollTrigger)
 
@@ -25,7 +24,6 @@
 -    const interval = setInterval(() => {
 -      setCurrentImageIndex(prev => prev >= totalImages ? 1 : prev + 1)
 -    }, 250)
--
      // Hero image scroll animation
      const heroScrollTrigger = ScrollTrigger.create({
        trigger: '.hero-img-holder',
@@ -36,25 +34,20 @@
 -    // Featured work animations
 -    const initFeaturedWork = () => {
 -      if (window.innerWidth <= 1000) return
--
 -      const indicatorContainer = document.querySelector('.featured-work-indicator')
 -      if (!indicatorContainer) return
--
 -      indicatorContainer.innerHTML = ''
--
 -      for (let section = 1; section <= 5; section++) {
 -        const sectionNumber = document.createElement('p')
 -        sectionNumber.className = 'mn'
 -        sectionNumber.textContent = `0${section}`
 -        indicatorContainer.appendChild(sectionNumber)
--
 -        for (let i = 0; i < 10; i++) {
 -          const indicator = document.createElement('div')
 -          indicator.className = 'indicator'
 -          indicatorContainer.appendChild(indicator)
 -        }
 -      }
--
 -      const featuredCardPosSmall = [
 -        { y: 100, x: 1000 },
 -        { y: 1500, x: 100 },
@@ -67,7 +60,6 @@
 -        { y: 900, x: 2200 },
 -        { y: 150, x: 1600 },
 -      ]
--
 -      const featuredCardPosLarge = [
 -        { y: 800, x: 5000 },
 -        { y: 2000, x: 3000 },
@@ -80,39 +72,29 @@
 -        { y: 3000, x: 1950 },
 -        { y: 500, x: 4500 },
 -      ]
--
 -      const featuredCardPos = window.innerWidth >= 1600 ? featuredCardPosLarge : featuredCardPosSmall
 -      const featuredTitles = document.querySelector('.featured-titles')
 -      const moveDistance = window.innerWidth * 4
 -      const imagesContainer = document.querySelector('.featured-images')
--
 -      if (!imagesContainer) return
--
 -      imagesContainer.innerHTML = ''
--
 -      for (let i = 1; i <= 10; i++) {
 -        const featuredImgCard = document.createElement('div')
 -        featuredImgCard.className = `featured-img-card featured-img-card-${i}`
--
 -        const img = document.createElement('img')
 -        img.src = `/images/work-items/work-item-${i}.jpg`
 -        img.alt = `featured work image ${i}`
 -        featuredImgCard.appendChild(img)
--
 -        const position = featuredCardPos[i - 1]
--
 -        gsap.set(featuredImgCard, {
 -          x: position.x,
 -          y: position.y,
 -          z: -1500,
 -          scale: 0,
 -        })
--
 -        imagesContainer.appendChild(featuredImgCard)
 -      }
--
 -      const featuredImgCards = document.querySelectorAll('.featured-img-card')
--
 -      ScrollTrigger.create({
 -        trigger: '.featured-work',
 -        start: 'top top',
@@ -124,7 +106,6 @@
 -          gsap.set(featuredTitles, {
 -            x: xPosition,
 -          })
--
 -          featuredImgCards.forEach((featuredImgCard, index) => {
 -            const staggerOffset = index * 0.075
 -            const scaledProgress = (self.progress - staggerOffset) * 2
@@ -132,21 +113,17 @@
 -            const newZ = -1500 + (1500 + 1500) * individualProgress
 -            const scaleProgress = Math.min(1, individualProgress * 10)
 -            const scale = Math.max(0, Math.min(1, scaleProgress))
--
 -            gsap.set(featuredImgCard, {
 -              z: newZ,
 -              scale: scale,
 -            })
 -          })
--
 -          const indicators = document.querySelectorAll('.indicator')
 -          const totalIndicators = indicators.length
 -          const progressPerIndicator = 1 / totalIndicators
--
 -          indicators.forEach((indicator, index) => {
 -            const indicatorStart = index * progressPerIndicator
 -            const indicatorOpacity = self.progress > indicatorStart ? 1 : 0.2
--
 -            gsap.to(indicator, {
 -              opacity: indicatorOpacity,
 -              duration: 0.3,
@@ -155,17 +132,13 @@
 -        },
 -      })
 -    }
--
 -    // Services animations
 -    const initServices = () => {
 -      if (window.innerWidth <= 1000) return
--
 -      const services = gsap.utils.toArray('.service-card')
--
 -      services.forEach((service, index) => {
 -        const isLastServiceCard = index === services.length - 1
 -        const serviceCardInner = service.querySelector('.service-card-inner')
--
 -        if (!isLastServiceCard) {
 -          ScrollTrigger.create({
 -            trigger: service,
@@ -175,7 +148,6 @@
 -            pin: true,
 -            pinSpacing: false,
 -          })
--
 -          gsap.to(serviceCardInner, {
 -            y: `-${(services.length - index) * 14}vh`,
 -            ease: 'none',
@@ -190,18 +162,14 @@
 -        }
 -      })
 -    }
--
 -    initFeaturedWork()
 -    initServices()
--
 -    const handleResize = () => {
 -      ScrollTrigger.refresh()
 -      initFeaturedWork()
 -      initServices()
 -    }
--
 -    window.addEventListener('resize', handleResize)
--
      return () => {
 -      clearInterval(interval)
        heroScrollTrigger.kill()
@@ -235,7 +203,6 @@
 -            </div>
 -          </div>
 -        </section>
--
 -        {/* Hero Image Holder */}
 -        <section className="hero-img-holder">
 -          <div className="hero-img">
@@ -247,7 +214,6 @@
 -            />
 -          </div>
 -        </section>
--
 -        {/* Featured Work */}
 -        <section className="featured-work">
 -          <div className="featured-images"></div>
@@ -287,7 +253,6 @@
 -            <p className="mn"><a href="/work">Browse Full Bizarre</a></p>
 -          </div>
 -        </section>
--
 -        {/* Services Header */}
 -        <section className="services-header">
 -          <div className="services-header-content">
@@ -309,7 +274,6 @@
 -            </div>
 -          </div>
 -        </section>
--
 -        {/* Services */}
 -        <section className="services">
 -          <div className="service-card" id="service-card-1">
@@ -373,6 +337,10 @@
 -            </div>
 -          </div>
 -        </section>
+        <Hero />
+        <FeaturedWork />
+        <ServicesHeader />
+        <Services />
 +        <Hero />
 +        <FeaturedWork />
 +        <ServicesHeader />
